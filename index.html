@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agendamento - Barbearia</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    /* Reset e base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      margin: 0; padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 40px;
+    }
+    header {
+      background: #000;
+      padding: 20px;
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 900;
+      color: #FFD700;
+      letter-spacing: 2px;
+      user-select: none;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+    }
+    main.container {
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      background: #1f1f1f;
+      border-radius: 12px;
+      margin-top: 20px;
+      box-shadow: 0 0 15px #FFD700aa;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    #servicos {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 8px;
+      outline: none;
+    }
+    .servico {
+      background: #2a2a2a;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      border: 2px solid transparent;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    .servico:hover {
+      background: #393939;
+      border-color: #FFD700;
+    }
+    .servico input[type="radio"] {
+      margin-right: 14px;
+      accent-color: #FFD700;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .servico img {
+      width: 70px;
+      height: 70px;
+      border-radius: 10px;
+      object-fit: cover;
+      margin-right: 14px;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px #FFD700aa;
+      transition: transform 0.3s;
+    }
+    .servico:hover img {
+      transform: scale(1.05);
+    }
+    .servico div {
+      flex: 1;
+    }
+    .servico strong {
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .servico small {
+      font-size: 0.85rem;
+      color: #ccc;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    input[type="text"],
+    input[type="datetime-local"] {
+      background-color: #2a2a2a;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      padding: 12px 16px;
+      transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    }
+    input[type="text"]:focus,
+    input[type="datetime-local"]:focus {
+      outline: none;
+      box-shadow: 0 0 8px #FFD700;
+      background-color: #3b3b3b;
+    }
+    button {
+      background-color: #FFD700;
+      border: none;
+      border-radius: 10px;
+      font-weight: 900;
+      color: #121212;
+      font-size: 1.2rem;
+      padding: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 12px #FFD700cc;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button:hover:not(:disabled) {
+      background-color: #e6c200;
+      box-shadow: 0 6px 14px #e6c200cc;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .spinner {
+      border: 4px solid #2a2a2a;
+      border-top: 4px solid #FFD700;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    #msgStatus {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #272727dd;
+      color: #FFD700;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-weight: 700;
+      font-size: 1rem;
+      box-shadow: 0 0 12px #FFD700cc;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 9999;
+    }
+    #msgStatus.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    @media (max-width: 520px) {
+      header {
+        font-size: 1.5rem;
+        padding: 16px;
+      }
+      main.container {
+        padding: 16px;
+      }
+      .servico img {
+        width: 55px;
+        height: 55px;
+      }
+      button {
+        font-size: 1rem;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>Agendamento de Serviços</header>
+  <main class="container" role="main" aria-label="Formulário de agendamento de serviços">
+    <form id="formAgendamento" novalidate>
+      <div id="servicos" role="radiogroup" aria-label="Selecione um serviço"></div>
+
+      <div class="form-group">
+        <label for="nome">Seu nome:</label>
+        <input
+          type="text"
+          id="nome"
+          name="nome"
+          placeholder="Digite seu nome completo"
+          required
+          autocomplete="name"
+          minlength="3"
+          aria-required="true"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="horario">Data e hora do agendamento:</label>
+        <input
+          type="datetime-local"
+          id="horario"
+          name="horario"
+          required
+          aria-required="true"
+        />
+      </div>
+
+      <button type="submit" id="btnAgendar" aria-live="polite" aria-busy="false">
+        Agendar <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
+      </button>
+    </form>
+  </main>
+
+  <div id="msgStatus" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD9kWG_RgdfBURwHafLWcN3P_qVxMvqHTE",
+      authDomain: "demobarbearia-4eb73.firebaseapp.com",
+      databaseURL: "https://demobarbearia-4eb73-default-rtdb.firebaseio.com",
+      projectId: "demobarbearia-4eb73",
+      storageBucket: "demobarbearia-4eb73.appspot.com",
+      messagingSenderId: "522986196174",
+      appId: "1:522986196174:web:7d78eb757acf64f3ff149f",
+      measurementId: "G-S0NJ2LX550"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const servicosDiv = document.getElementById("servicos");
+    const form = document.getElementById("formAgendamento");
+    const btnAgendar = document.getElementById("btnAgendar");
+    const msgStatus = document.getElementById("msgStatus");
+
+    // Função pra mostrar mensagem temporária
+    function showMessage(msg, isError = false) {
+      msgStatus.textContent = msg;
+      msgStatus.style.backgroundColor = isError ? '#7a1e1edd' : '#272727dd';
+      msgStatus.classList.add('show');
+      setTimeout(() => {
+        msgStatus.classList.remove('show');
+      }, 4000);
+    }
+
+    // Carregar serviços do Firebase
+    onValue(ref(db, 'servicos'), (snapshot) => {
+      servicosDiv.innerHTML = '';
+      if (!snapshot.exists()) {
+        servicosDiv.innerHTML = `<p style="color:#bbb; font-style: italic;">Nenhum serviço cadastrado.</p>`;
+        return;
+      }
+      snapshot.forEach(child => {
+        const servico = child.val();
+
+        const label = document.createElement('label');
+        label.className = 'servico';
+        label.tabIndex = 0;
+        label.setAttribute('role', 'radio');
+        label.setAttribute('aria-checked', 'false');
+        label.setAttribute('aria-label', `${servico.nome}, preço R$ ${servico.preco}, duração ${servico.tempo} minutos`);
+
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'servico';
+        input.value = child.key;
+        input.required = true;
+        input.setAttribute('aria-required', 'true');
+
+        input.addEventListener('change', () => {
+          const radios = servicosDiv.querySelectorAll('[role=radio]');
+          radios.forEach(r => r.setAttribute('aria-checked', 'false'));
+          label.setAttribute('aria-checked', 'true');
+        });
+
+        label.addEventListener('keydown', e => {
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            input.checked = true;
+            input.dispatchEvent(new Event('change'));
+          }
+        });
+
+        const img = document.createElement('img');
+        img.src = servico.imagem;
+        img.alt = servico.nome;
+
+        const infoDiv = document.createElement('div');
+        const strong = document.createElement('strong');
+        strong.textContent = servico.nome;
+        const small = document.createElement('small');
+        small.textContent = `R$ ${servico.preco} - ${servico.tempo} min`;
+
+        infoDiv.appendChild(strong);
+        infoDiv.appendChild(small);
+
+        label.appendChild(input);
+        label.appendChild(img);
+        label.appendChild(infoDiv);
+        servicosDiv.appendChild(label);
+      });
+    });
+
+    // Validação da data/hora do agendamento
+    function validarHorario(valor) {
+      if (!valor) return false;
+      const agora = new Date();
+      const data = new Date(valor);
+      if (isNaN(data)) return false;
+      if (data <= agora) return false;
+      const hora = data.getHours();
+      if (hora < 9 || hora > 20) return false;
+      const maxData = new Date();
+      maxData.setDate(maxData.getDate() + 30);
+      if (data > maxData) return false;
+      return true;
+    }
+
+    let agendando = false;
+
+    function setLoading(isLoading) {
+      agendando = isLoading;
+      btnAgendar.disabled = isLoading;
+      btnAgendar.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+      if (isLoading) {
+        btnAgendar.innerHTML = 'Agendando <span class="spinner" aria-hidden="true"></span>';
+      } else {
+        btnAgendar.innerHTML = 'Agendar <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>';
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (agendando) return;
+
+      const nome = form.nome.value.trim();
+      const horario = form.horario.value;
+      const servicoInput = form.querySelector('input[name="servico"]:checked');
+
+      if (!nome || nome.length < 3) {
+        showMessage('Informe seu nome completo (mínimo 3 caracteres).', true);
+        form.nome.focus();
+        return;
+      }
+      if (!validarHorario(horario)) {
+        showMessage('Escolha uma data/hora válida no futuro, entre 09h e 20h.', true);
+        form.horario.focus();
+        return;
+      }
+      if (!servicoInput) {
+        showMessage('Selecione um serviço antes de agendar.', true);
+        servicosDiv.focus();
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        await push(ref(db, 'agendamentos'), {
+          nome,
+          horario,
+          servicoId: servicoInput.value,
+          status: 'Aprovado',
+          criadoEm: new Date().toISOString()
+        });
+        showMessage('Agendamento realizado com sucesso!');
+        form.reset();
+        // Reset aria-checked
+        const radios = servicosDiv.querySelectorAll('[role=radio]');
+        radios.forEach(r => r.setAttribute('aria-checked', 'false'));
+      } catch (error) {
+        showMessage('Erro ao agendar: ' + error.message, true);
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>
