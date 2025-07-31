@@ -36,6 +36,7 @@
       letter-spacing: 2px;
       user-select: none;
       box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+      border-radius: 8px;
     }
     #logo {
       border-radius:50%;
@@ -222,10 +223,11 @@
         height: 55px;
       }
       button {
-        font-size: 1rem;
+        font-size: 12rem;
         padding: 12px;
       }
     }
+
 
     /* Tela de carregamento (splash) */
     #splash {
@@ -275,6 +277,42 @@
     .titulo{
       font-size:16px;
     }
+}
+
+    #toggleMenu {
+  font-size: 5px;
+  margin-left: auto;
+  cursor: pointer;
+  color: #FFD700;
+}
+
+#menuHistorico {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  width: 280px;
+  height: calc(100vh - 80px);
+  background: #000;
+  color: #fff;
+  box-shadow: 2px 0 10px #FFD70055;
+  padding: 20px;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 2000;
+  border-radius: 20px;
+}
+
+#menuHistorico.open {
+  transform: translateX(0);
+}
+
+#menuHistorico h3 {
+  color: #FFD700;
+  margin-bottom: 20px;
+}
+
+    
   </style>
 </head>
 <body>
@@ -288,7 +326,9 @@
   </div>
 
   <header><img src="logobarber.png" alt="Logo da Barbearia" id="logo" />
-    <h1 class="titulo">Aplicativo Demonstração</h1></header>
+    <span id="toggleMenu"><i class="fa-solid fa-clock-rotate-left"></i></span>
+    <div id="menuHistorico"></div>
+<h1 class="titulo">Aplicativo Demonstração</h1></header>
   <main class="container" style="display:none;">
     <form id="formAgendamento" novalidate>
       <div id="servicos"></div>
@@ -513,6 +553,7 @@
         });
         showMessage('Agendamento realizado com sucesso!');
         form.reset();
+        await salvarNoHistorico({ nome, horario });
         campoHora.innerHTML = '<option value="">Selecione uma data primeiro</option>';
       } catch (err) {
         showMessage('Erro ao agendar: ' + err.message, true);
@@ -546,6 +587,80 @@
     fetchServicos();
     initSplash();
   </script>
+<script>
+  const toggleMenu = document.getElementById('toggleMenu');
+  const menuHistorico = document.getElementById('menuHistorico');
+
+  toggleMenu.addEventListener('click', () => {
+    menuHistorico.classList.toggle('open');
+
+    document.addEventListener('click', (e) => {
+  const clicouForaDoMenu = !menuHistorico.contains(e.target) && !toggleMenu.contains(e.target);
+  if (menuHistorico.classList.contains('open') && clicouForaDoMenu) {
+    menuHistorico.classList.remove('open');
+  }
+});
+
+  });
+
+  const renderizarHistorico = () => {
+    const historico = JSON.parse(localStorage.getItem('historicoAgendamentos')) || [];
+    menuHistorico.innerHTML = '<h3>Histórico de Agendamentos</h3>';
+
+    historico.slice(0, 5).forEach((agendamento, index) => {
+      const div = document.createElement('div');
+      div.style.marginBottom = '16px';
+      div.style.padding = '10px';
+      div.style.background = '#1f1f1f';
+      div.style.borderRadius = '8px';
+
+      div.innerHTML = `
+        <strong>${agendamento.nome}</strong><br>
+        <small>${formatarDataHora(agendamento.horario)}</small>
+      `;
+
+      if (index === 0) {
+        const btnCancelar = document.createElement('button');
+        btnCancelar.textContent = 'Solicitar Cancelamento';
+        btnCancelar.style.marginTop = '8px';
+        btnCancelar.onclick = () => {
+  const msg = `Olá, gostaria de cancelar o agendamento de ${agendamento.nome} marcado para ${formatarDataHora(agendamento.horario)}.`;
+  window.open(`https://wa.me/5564992952748?text=${encodeURIComponent(msg)}`, '_blank');
+};
+
+        const btnEspera = document.createElement('button');
+        btnEspera.textContent = 'Pedir +5 min';
+        btnEspera.style.marginTop = '6px';
+        btnEspera.onclick = () => {
+  const msg = `Olá, gostaria de solicitar um acréscimo de 5 minutos para o agendamento de ${agendamento.nome} marcado para ${formatarDataHora(agendamento.horario)}.`;
+  window.open(`https://wa.me/5564992952748?text=${encodeURIComponent(msg)}`, '_blank');
+};
+
+        div.appendChild(btnCancelar);
+        div.appendChild(btnEspera);
+      }
+
+      menuHistorico.appendChild(div);
+    });
+  };
+
+  const formatarDataHora = (iso) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  async function salvarNoHistorico(agendamento) {
+    const historico = JSON.parse(localStorage.getItem('historicoAgendamentos')) || [];
+    historico.unshift(agendamento);
+    localStorage.setItem('historicoAgendamentos', JSON.stringify(historico.slice(0, 5)));
+    renderizarHistorico();
+  }
+
+  renderizarHistorico();
+</script>
 
 </body>
 </html>
