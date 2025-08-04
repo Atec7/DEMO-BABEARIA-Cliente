@@ -1,6 +1,6 @@
 {
-  "name": "App Demonstração",
-  "short_name": "App Demonstração",
+  "name": "Cliente",
+  "short_name": "Cliente",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#121212",
@@ -8,16 +8,17 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "logo.jpg",
+      "src": "logo.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "logo.jpg",
+      "src": "logo.png",
       "sizes": "512x512",
-      "type": "image/jpg"
+      "type": "image/png"
     }
   ]
 }
+
 
 
