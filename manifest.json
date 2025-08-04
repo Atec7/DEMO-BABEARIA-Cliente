@@ -1,6 +1,6 @@
 {
   "name": "Agendamento Barbearia",
-  "short_name": "Barbearia",
+  "short_name": "App Demonstração",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#121212",
@@ -19,3 +19,4 @@
     }
   ]
 }
+
